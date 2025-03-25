@@ -14,15 +14,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class HttpDownloader implements DownloaderInterface {
     private static final Path DEFAULT_OUTPUT_DIR = Path.of("output");
-    private ExecutorService executor;
-    
+    private final ExecutorService executor;
+    private static final Map<String, ReentrantLock> fileLocks = new ConcurrentHashMap<>();
+
+
     public HttpDownloader(@NotNull @Min(1) int poolSize) {
         executor = newFixedThreadPool(poolSize);
     }
@@ -36,12 +41,23 @@ public class HttpDownloader implements DownloaderInterface {
         
         Path outputDir = getOutputDir(destDir);
         Path outputPath = outputDir.resolve(fileName);
-
+        ReentrantLock lock = getLockForPath(outputPath);
+        lock.lock();
         try (BufferedInputStream in = new BufferedInputStream(url.openStream())) {
             Files.copy(in, outputPath, StandardCopyOption.REPLACE_EXISTING);
-        } 
+        } catch (IOException e) {
+            throw new FileDownloadException("An error occurred while downloading the file: " + file.name()
+                    , e);
+        } finally {
+            lock.unlock();
+        }
     }
 
+    private static ReentrantLock getLockForPath(Path path) {
+        return fileLocks.computeIfAbsent(path.toAbsolutePath().toString(),
+                p -> new ReentrantLock());
+    }
+    
     /**
      * Extracts the file name from the URI's path. 
      * If there's no '/', the entire path is taken as the filename.
