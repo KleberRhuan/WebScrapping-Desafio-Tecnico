@@ -60,6 +60,7 @@ public class ScrapperService {
             Elements elements = parsePageForElementsLinks(scrappingRequest.getUrl());
             List<FilelinkModel> files = getLinksFromElements(elements);
             downloader.downloadFiles(files, destDir);
+            downloader.shutdown();
         } catch (IOException e) {
             throw new WebsiteConnectionException("An error occurred while connecting to the website: " + scrappingRequest.getUrl(),
                     e);
