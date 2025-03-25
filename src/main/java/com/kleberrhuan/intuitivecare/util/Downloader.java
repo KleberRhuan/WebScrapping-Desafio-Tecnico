@@ -4,7 +4,7 @@ import com.kleberrhuan.intuitivecare.model.FilelinkModel;
 
 import java.io.IOException;
 
-public interface DownloaderInterface {
+public interface Downloader {
     /**
      * Makes an HTTP request to download a file from the given URL and save it to the specified path.
      *
