@@ -1,4 +1,4 @@
-# TESTES DE NIVELAMENTO v.250321
+# TESTE TÉCNICO - INTUITIVECARE
 
 Este projeto foi desenvolvido em **Java** utilizando Maven e tem como objetivo realizar um teste de Web Scraping. Nele, o sistema realiza as seguintes operações:
 
@@ -97,4 +97,4 @@ mvn test
 
 ---
 
-Este projeto foi desenvolvido como parte dos **TESTES DE NIVELAMENTO v.250321**.  
+Este projeto foi desenvolvido como parte dos **TESTE TÉCNICO - INTUITIVECARE**.  
