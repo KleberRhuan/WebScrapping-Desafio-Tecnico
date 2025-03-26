@@ -55,7 +55,7 @@ public class ScrapperService {
                 .toList();
     }
     
-    public void downloadFiles(String destDir) {
+    public void downloadFiles(String destDir) throws WebsiteConnectionException {
         try {
             Elements elements = parsePageForElementsLinks(scrappingRequest.getUrl());
             List<FilelinkModel> files = getLinksFromElements(elements);
