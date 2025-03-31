@@ -3,40 +3,39 @@ package com.kleberrhuan.intuitivecare.service;
 import com.kleberrhuan.intuitivecare.model.FilelinkModel;
 import com.kleberrhuan.intuitivecare.util.HttpDownloader;
 import com.kleberrhuan.intuitivecare.util.ZipManager;
-import lombok.AllArgsConstructor;
+import com.kleberrhuan.intuitivecare.util.helpers.DirectoryHelper;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Service responsible for downloading file links from the specified base URL.
+ * Serviço responsável pelo download de arquivos a partir da URL base
+ * especificada.
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class FileDownloaderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloaderService.class);
-
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(FileDownloaderService.class);
     private final String baseUrl;
     private final HttpDownloader httpDownloader;
 
     /**
-     * Downloads files from the latest N year folders.
+     * Realiza o download de arquivos das pastas dos N anos mais recentes.
      *
-     * @param numberOfYears number of recent years to download from
-     * @throws IOException if there is an error accessing or creating file directories
+     * @param numberOfYears número de anos recentes para download
+     * @throws IOException se houver um erro ao acessar ou criar diretórios
      */
-    public void downloadLatestYears(int numberOfYears) throws IOException {
+    public void downloadLatestYears(int numberOfYears, Path outputDir) throws IOException {
         List<String> allFolders = retrieveYearFolders();
         allFolders.sort(Comparator.reverseOrder());
 
@@ -44,16 +43,15 @@ public class FileDownloaderService {
         List<String> latestFolders = allFolders.subList(0, limit);
         for (String folder : latestFolders) {
             String folderUrl = baseUrl + folder + "/";
-            String localDir = "downloads/" + folder;
-            downloadAllZipsInFolder(folderUrl, localDir);
+            downloadAllZipsInAPath(folderUrl, outputDir.resolve(folder));
         }
     }
 
     /**
-     * Retrieves the year folders from the configured base URL.
+     * Recupera as pastas de anos da URL base configurada.
      *
-     * @return a list of year-folder names
-     * @throws IOException if there is an error connecting or parsing the remote page
+     * @return uma lista com os nomes das pastas de anos
+     * @throws IOException se houver um erro ao conectar ou analisar a página remota
      */
     public List<String> retrieveYearFolders() throws IOException {
         Document doc = Jsoup.connect(baseUrl).get();
@@ -71,43 +69,34 @@ public class FileDownloaderService {
     }
 
     /**
-     * Finds all zip files in a given folder URL and downloads them in parallel.
+     * Localiza todos os arquivos zip em uma determinada URL de pasta e faz o
+     * download em paralelo.
      *
-     * @param folderUrl folder URL to scan
-     * @param localDir  local directory to save downloads
-     * @throws IOException if there is an error creating directories or connecting to the folder URL
+     * @param url       URL dos arquivos zip
+     * @param outputDir diretório local para salvar os downloads
+     * @throws IOException se houver um erro ao criar diretórios ou conectar à URL
+     *                     da pasta
      */
-    private void downloadAllZipsInFolder(String folderUrl, String localDir) throws IOException {
-        LOGGER.info("Accessing folder: {}", folderUrl);
-        Files.createDirectories(Paths.get(localDir));
+    private void downloadAllZipsInAPath(String url, Path outputDir) throws IOException {
+        LOGGER.info("Acessando pasta: {}", url);
 
-        Document doc = Jsoup.connect(folderUrl).get();
+        Document doc = Jsoup.connect(url).get();
         Elements links = doc.select("a[href]");
-        
+        Path finalOutputDir = DirectoryHelper.createDirectoryIfNotExists(outputDir);
+
         links.parallelStream().forEach(link -> {
             String fileHref = link.attr("href");
             if (fileHref.endsWith(".zip")) {
-                String fileUrl = folderUrl + fileHref;
-                LOGGER.info("Downloading file: {}", fileUrl);
+                String fileUrl = url + fileHref;
+                LOGGER.info("Baixando arquivo: {}", fileUrl);
                 try {
                     FilelinkModel fileLink = new FilelinkModel(fileHref, fileUrl);
-                    httpDownloader.downloadFile(fileLink, localDir);
-                    ZipManager.extractZip(Paths.get(localDir + "/" + fileHref), Paths.get(localDir));
+                    httpDownloader.downloadFile(fileLink, finalOutputDir);
+                    ZipManager.extractZip(finalOutputDir.resolve(fileHref), finalOutputDir);
                 } catch (IOException e) {
-                    LOGGER.error("Failed to download file: {}", fileUrl, e);
+                    LOGGER.error("Falha ao baixar arquivo: {}", fileUrl, e);
                 }
             }
         });
     }
-    
-    public static void main(String[] args) {
-        FileDownloaderService service = new FileDownloaderService("https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/", 
-                new HttpDownloader(4));
-        try {
-            service.downloadLatestYears(2);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    } 
-
 }
