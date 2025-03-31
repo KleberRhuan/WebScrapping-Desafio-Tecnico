@@ -1,4 +1,4 @@
-package com.kleberrhuan.intuitivecare.util;
+package com.kleberrhuan.intuitivecare.util.helpers;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,25 +9,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Utility class for directory operations.
- * This class provides methods to validate and create directories, ensuring that the input path is valid.
+ * Classe utilitária para operações com diretórios.
+ * Esta classe fornece métodos para validar e criar diretórios, garantindo que o
+ * caminho informado seja válido.
  */
 public final class DirectoryHelper {
-    private DirectoryHelper() {}
-    
+    private DirectoryHelper() {
+    }
+
     /**
-     * Creates the specified directory if it does not exist.
-     * If the path exists but is not a directory, an IllegalArgumentException is thrown.
+     * Cria o diretório especificado se ele não existir.
+     * Se o caminho existir mas não for um diretório, uma IllegalArgumentException
+     * será lançada.
      *
-     * @param dir the directory path to create.
-     * @return the existing or newly created directory path.
-     * @throws IOException if an I/O error occurs during creation.
-     * @throws IllegalArgumentException if the provided path is null or exists and is not a directory.
+     * @param dir o caminho do diretório a ser criado.
+     * @return o caminho do diretório existente ou recém-criado.
+     * @throws IOException              se ocorrer um erro de E/S durante a criação.
+     * @throws IllegalArgumentException se o caminho fornecido for nulo ou existir e
+     *                                  não for um diretório.
      */
     public static Path createDirectoryIfNotExists(@NotNull Path dir) throws IOException {
         boolean exists = Files.exists(dir);
         if (exists && !Files.isDirectory(dir)) {
-            throw new IllegalArgumentException("The path " + dir + " exists, but is not a directory.");
+            throw new IllegalArgumentException("O caminho " + dir + " existe, mas não é um diretório.");
         } else if (!exists) {
             Files.createDirectories(dir);
         }
@@ -35,21 +39,27 @@ public final class DirectoryHelper {
     }
 
     /**
-     * Creates the specified directory from a String if it does not exist.
+     * Cria o diretório especificado a partir de uma String se ele não existir.
      *
-     * @param directoryPath the directory path as a String.
-     * @return the existing or newly created directory path.
-     * @throws IOException if an I/O error occurs during creation.
-     * @throws IllegalArgumentException if the provided path is null or empty.
+     * @param directoryPath o caminho do diretório como uma String.
+     * @return o caminho do diretório existente ou recém-criado.
+     * @throws IOException              se ocorrer um erro de E/S durante a criação.
+     * @throws IllegalArgumentException se o caminho fornecido for nulo ou vazio.
      */
     public static Path createDirectoryIfNotExists(String directoryPath) throws IOException {
         if (directoryPath == null || directoryPath.isEmpty()) {
-            throw new IllegalArgumentException("The directory path cannot be null or empty.");
+            throw new IllegalArgumentException("O caminho do diretório não pode ser nulo ou vazio.");
         }
         Path dir = Paths.get(directoryPath);
         return createDirectoryIfNotExists(dir);
     }
-    
+
+    /**
+     * Obtém o nome do arquivo ZIP, adicionando a extensão .zip se necessário.
+     *
+     * @param fileName o nome do arquivo
+     * @return o nome do arquivo com a extensão .zip
+     */
     public static String getZipFileName(@NotBlank String fileName) {
         if (fileName.toLowerCase().endsWith(".zip")) {
             return fileName;

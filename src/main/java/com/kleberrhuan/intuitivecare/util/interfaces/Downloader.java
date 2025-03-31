@@ -1,16 +1,21 @@
-package com.kleberrhuan.intuitivecare.util;
+package com.kleberrhuan.intuitivecare.util.interfaces;
 
 import com.kleberrhuan.intuitivecare.model.FilelinkModel;
-
 import java.io.IOException;
+import java.nio.file.Path;
 
+/**
+ * Interface para classes que realizam operações de download de arquivos.
+ */
 public interface Downloader {
     /**
-     * Makes an HTTP request to download a file from the given URL and save it to the specified path.
+     * Faz uma requisição HTTP para baixar um arquivo da URL fornecida e salvá-lo no
+     * caminho especificado.
      *
-     * @param file object containing the URL and name of the file to download.
-     * @param destinationDir Local dir where the file will be saved.
-     * @throws IOException If an error occurs during the download.
+     * @param file           objeto contendo a URL e o nome do arquivo a ser
+     *                       baixado.
+     * @param destinationDir Diretório local onde o arquivo será salvo.
+     * @throws IOException Se ocorrer um erro durante o download.
      */
-    void downloadFile(FilelinkModel file, String destinationDir) throws IOException;
+    void downloadFile(FilelinkModel file, Path outputDir) throws IOException;
 }
