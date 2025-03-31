@@ -10,6 +10,6 @@ public record FileModel(
         FileType fileType
 ) {
         public String getFullName() {
-                return name + fileType.getExtension();
+                return name.replace(' ', '_') + fileType.getExtension();
         }
 }
