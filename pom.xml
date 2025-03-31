@@ -48,8 +48,6 @@
             <groupId>technology.tabula</groupId>
             <artifactId>tabula</artifactId>
             <version>1.0.6</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/tabula-1.0.6.jar</systemPath>
         </dependency>
         
         <!-- Dependências de Teste -->
