@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  postgres:
+    build:
+      context: ../../
+      dockerfile: sql/3.2/Dockerfile
+    container_name: intuitive_care_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: intuitive_care
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./:/backup # Para caso precise restaurar de um backup
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Opcional: Serviço pgAdmin para administração do banco
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: intuitive_care_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: intuitive_care_postgres_data
