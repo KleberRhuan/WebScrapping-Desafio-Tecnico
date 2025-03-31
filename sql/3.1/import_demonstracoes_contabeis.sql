@@ -2,13 +2,19 @@
 CREATE SCHEMA IF NOT EXISTS accounting;
 CREATE SCHEMA IF NOT EXISTS config;
 
+CREATE COLLATION IF NOT EXISTS pt_br_ci_ai (
+    PROVIDER = icu,
+    DETERMINISTIC = FALSE,
+    LOCALE = 'pt-u-ks-level1'
+    );
+
 -- Tabela otimizada baseada no dicionário de dados do link https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/
 CREATE TABLE IF NOT EXISTS accounting.demonstracoes_contabeis(
                                                                  id bigserial PRIMARY KEY,
                                                                  data DATE, -- Data do início do trimestre dos dados (AAAA-MM-DD)
                                                                  reg_ans INTEGER, -- Registro da operadora (Número, 8 dígitos)
                                                                  cd_conta_contabil INTEGER, -- Código da conta contábil (Número, 8 dígitos)
-                                                                 descricao VARCHAR(150), -- Descrição da conta contábil (Texto, 150 caracteres)
+                                                                 descricao VARCHAR(150) COLLATE "pt_br_ci_ai", -- Descrição da conta contábil (Texto, 150 caracteres)
                                                                  vl_saldo_inicial NUMERIC, -- Valor do saldo inicial
                                                                  vl_saldo_final NUMERIC  -- Valor do saldo final
 );
@@ -91,15 +97,15 @@ BEGIN
                         CASE WHEN reg_ans ~ ''^\\d+$'' THEN reg_ans::integer ELSE NULL END,
                         CASE WHEN cd_conta_contabil ~ ''^\\d+$'' THEN cd_conta_contabil::integer ELSE NULL END,
                         descricao,
-                        CASE 
-                            WHEN vl_saldo_inicial ~ ''^-?\\d+([,.]\\d+)?$'' 
-                            THEN REPLACE(REPLACE(vl_saldo_inicial, ''.'', ''''), '','', ''.'')::numeric 
-                            ELSE NULL 
+                        CASE
+                            WHEN vl_saldo_inicial ~ ''^-?\\d+([,.]\\d+)?$''
+                            THEN REPLACE(REPLACE(vl_saldo_inicial, ''.'', ''''), '','', ''.'')::numeric
+                            ELSE NULL
                         END,
-                        CASE 
-                            WHEN vl_saldo_final ~ ''^-?\\d+([,.]\\d+)?$'' 
-                            THEN REPLACE(REPLACE(vl_saldo_final, ''.'', ''''), '','', ''.'')::numeric 
-                            ELSE NULL 
+                        CASE
+                            WHEN vl_saldo_final ~ ''^-?\\d+([,.]\\d+)?$''
+                            THEN REPLACE(REPLACE(vl_saldo_final, ''.'', ''''), '','', ''.'')::numeric
+                            ELSE NULL
                         END
                     FROM temp_demonstracoes_contabeis
                     ';
