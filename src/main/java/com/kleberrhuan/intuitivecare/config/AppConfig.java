@@ -12,7 +12,7 @@ public class AppConfig {
 
   public static final String DEFAULT_PDF_FILENAME = "Anexo_I.pdf";
   public static final String DEFAULT_CSV_FILENAME = "Anexo_I.csv";
-  public static final String DEFAULT_ZIP_FILENAME = "Anexo_I.zip";
+  public static final String DEFAULT_ZIP_FILENAME = "Teste_Kleber_Rhuan.zip";
 
   /** URL do site da ANS para web scraping */
   public static final String ANS_URL = "https://www.gov.br/ans/pt-br/acesso-a-informacao/participacao-da-sociedade/atualizacao-do-rol-de-procedimentos";
